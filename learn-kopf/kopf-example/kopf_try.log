@@ -1,0 +1,39 @@
+2020-05-06 17:08:57,305 [Glogger        ] [DEBUG ]  GLogger initialized with log_level=DEBUG for std_out
+2020-05-06 17:09:01,463 [Glogger        ] [ERROR ]  MaxRetryError: HTTPSConnectionPool(host='10.5.224.23', port=8443): Max retries exceeded with url: /api/v1/pods?watch=False (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001B7FC0F4760>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+NoneType: None
+2020-05-06 17:09:01,463 [Glogger        ] [ERROR ]  Traceback (most recent call last):
+File "C:/G/OneDrive - Nokia/pythonProjects/learn-kopf/kopf-example/smoke_test.py", line 65, in <module>
+	stam("1G", "myname", "myns", logger)
+File "C:/G/OneDrive - Nokia/pythonProjects/learn-kopf/kopf-example/smoke_test.py", line 54, in stam
+	ret = api.list_pod_for_all_namespaces(watch=False)
+File "C:\Python38\lib\site-packages\kubernetes\client\api\core_v1_api.py", line 14098, in list_pod_for_all_namespaces
+	(data) = self.list_pod_for_all_namespaces_with_http_info(**kwargs)# noqa: E501
+File "C:\Python38\lib\site-packages\kubernetes\client\api\core_v1_api.py", line 14179, in list_pod_for_all_namespaces_with_http_info
+	return self.api_client.call_api(
+File "C:\Python38\lib\site-packages\kubernetes\client\api_client.py", line 340, in call_api
+	return self.__call_api(resource_path, method,
+File "C:\Python38\lib\site-packages\kubernetes\client\api_client.py", line 172, in __call_api
+	response_data = self.request(
+File "C:\Python38\lib\site-packages\kubernetes\client\api_client.py", line 362, in request
+	return self.rest_client.GET(url,
+File "C:\Python38\lib\site-packages\kubernetes\client\rest.py", line 237, in GET
+	return self.request("GET", url,
+File "C:\Python38\lib\site-packages\kubernetes\client\rest.py", line 210, in request
+	r = self.pool_manager.request(method, url,
+File "C:\Python38\lib\site-packages\urllib3\request.py", line 75, in request
+	return self.request_encode_url(
+File "C:\Python38\lib\site-packages\urllib3\request.py", line 97, in request_encode_url
+	return self.urlopen(method, url, **extra_kw)
+File "C:\Python38\lib\site-packages\urllib3\poolmanager.py", line 336, in urlopen
+	response = conn.urlopen(method, u.request_uri, **kw)
+File "C:\Python38\lib\site-packages\urllib3\connectionpool.py", line 752, in urlopen
+	return self.urlopen(
+File "C:\Python38\lib\site-packages\urllib3\connectionpool.py", line 752, in urlopen
+	return self.urlopen(
+File "C:\Python38\lib\site-packages\urllib3\connectionpool.py", line 752, in urlopen
+	return self.urlopen(
+File "C:\Python38\lib\site-packages\urllib3\connectionpool.py", line 724, in urlopen
+	retries = retries.increment(
+File "C:\Python38\lib\site-packages\urllib3\util\retry.py", line 439, in increment
+	raise MaxRetryError(_pool, url, error or ResponseError(cause))
+NoneType: None

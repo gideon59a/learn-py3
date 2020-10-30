@@ -1,0 +1,5 @@
+apiVersion: zalando.org/v1
+kind: EphemeralVolumeClaim
+metadata:
+  name: my-claim
+
