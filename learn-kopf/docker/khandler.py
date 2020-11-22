@@ -8,7 +8,7 @@ import logging
 # If we want a separated log into a file, the following worked at least outside the functions:
 from Glogger import GLogger
 mylog_level = logging.DEBUG
-mylogger = GLogger(log_file="kopf_try.log", log_level=mylog_level)
+mylogger = GLogger(log_file="/var/log/kopf_example.log", log_level=mylog_level)
 glogger = mylogger.get_logger()
 glogger.debug("STARTING LOG")
 
@@ -48,20 +48,31 @@ load_cluster_info_to_kopf()
 
 @kopf.on.create('zalando.org', 'v1', 'ephemeralvolumeclaims')
 def create_fn(spec, name, namespace, logger, **kwargs):
-    # Note: The name "logger" is required)
+    ''' Triggered on evc creation
+    :param spec: The evc manifest's spec
+    :param name:
+    :param namespace:
+    :param logger:
+    :param kwargs:
+    :return:
+    '''
+    # Note: The specific attribute name "logger" must be used
 
     logger.info("ENTERING INTO EVC CREATE")
     glogger.debug("ALSO INTO A FILE: ENTERING INTO EVC CREATE")
 
     size = spec.get('size')
+    storageClassName = spec.get('storageClassName')
     if not size:
         raise kopf.PermanentError(f"Size must be set. Got {size!r}.")
+    if not storageClassName:
+        storageClassName = "local-storage"
 
     path = os.path.join(os.path.dirname(__file__), 'pvc.yaml')
     print("path: ", path)
     tmpl = open(path, 'rt').read()  # read the file into str
     # print("templ type: ", type(tmpl))
-    text_str = tmpl.format(name=name, size=size)
+    text_str = tmpl.format(name=name, size=size, storageClassName=storageClassName)
     # print("text type: ", type(text))
     data = yaml.safe_load(text_str)  # Load into dict
     print("\nData type: ", type(data), "\nData: ", str(data), "\n")
@@ -77,12 +88,13 @@ def create_fn(spec, name, namespace, logger, **kwargs):
         body=data,
     )
 
-    logger.info(f"\n ******** PVC child is created: %s ********* \n\n", obj)
+    logger.info(f"\n ******** PVC child has been created: %s ********* \n\n", obj)
+    glogger.debug(" ******** PVC child has been created: ********* \n\n")
 
 
 @kopf.on.update('zalando.org', 'v1', 'ephemeralvolumeclaims')
 def update_fn(spec, status, namespace, logger, **kwargs):
-    # Update the PVC size
+    ''' Update the PVC size '''
     logger.info("ENTERING INTO EVC UPDATE")
     glogger.debug("ALSO INTO the LOG FILE: ENTERING INTO EVC UPDATE")
 

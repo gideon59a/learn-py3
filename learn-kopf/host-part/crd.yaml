@@ -1,3 +1,4 @@
+### Must be applied at the target K8S cluster BEFORE the operator's docker runs.
 # added per https://kopf.readthedocs.io/en/latest/walkthrough/resources/
 # uses /v1 api, and the whole schema section is while the whole schema section is new
 apiVersion: apiextensions.k8s.io/v1
