@@ -14,7 +14,7 @@ glogger.debug("STARTING LOG")
 
 
 '''
-# The current log is embedded into KOPF one (NO MUCH POINT TO IT)
+# The current log is embedded into KOPF one
 # mylog_level = logging.DEBUG  ## makes not differce
 # logging.basicConfig(filename='main.log', level=logging.DEBUG)  ## makes not differce
 logging.debug(' Message sent from the main file')
@@ -24,31 +24,32 @@ xlogger = logging.getLogger(__name__)
 xlogger.debug("local (non KOPFD) logger initialized")
 '''
 
+''' Its output is:
+root@d00609c69511:~/learn-kopf/kopf-example# kopf run ephemeral.py --verbose
+[2020-11-05 14:23:00,882] root                 [DEBUG   ]  Message sent from the main file
+[2020-11-05 14:23:00,883] root                 [INFO    ] So should see this
+[2020-11-05 14:23:00,883] root                 [WARNING ] And this too
+[2020-11-05 14:23:00,883] ephemeral            [DEBUG   ] local (non KOPFD) logger initialized
+
+'''
+
+
+
 linux_config_file = "/root/.kube/config"
 win10_config_file = "c:\kubectl\kubeconfig-win10"
+#mode="win10"
 mode = "linux"
-
-
-def load_cluster_info_to_kopf():
-    if mode == "win10":
-        config_file = win10_config_file
-        context = "minikube"
-    else:  # linux
-        config_file = os.environ.get('K8S_CONFIG_FILE')
-        if config_file is None:
-            config_file = linux_config_file
-        context = os.environ.get('K8S_CONTEXT')
-    glogger.info("K8S config file = {} , Context = {} ".format(config_file, context))
-    kubernetes.config.load_kube_config(config_file=config_file, context=context)
-    return
-
-
-load_cluster_info_to_kopf()
-
+if mode == "win10":
+    config_file = win10_config_file
+    context = "minikube"
+else:
+    config_file = linux_config_file
+    #context = "k8sb1"
+    context = "kubernetes-admin@kubernetes"
 
 @kopf.on.create('zalando.org', 'v1', 'ephemeralvolumeclaims')
 def create_fn(spec, name, namespace, logger, **kwargs):
-    # Note: The name "logger" is required)
+#Note: The name "logger" is required)
 
     logger.info("ENTERING INTO EVC CREATE")
     glogger.debug("ALSO INTO A FILE: ENTERING INTO EVC CREATE")
@@ -70,6 +71,7 @@ def create_fn(spec, name, namespace, logger, **kwargs):
     kopf.adopt(data)
 
     logger.info(f"Data:\n%s", str(data))
+    kubernetes.config.load_kube_config(config_file="/root/.kube/config", context=context)
     api = kubernetes.client.CoreV1Api()
     print("********")
     obj = api.create_namespaced_persistent_volume_claim(
@@ -82,9 +84,7 @@ def create_fn(spec, name, namespace, logger, **kwargs):
 
 @kopf.on.update('zalando.org', 'v1', 'ephemeralvolumeclaims')
 def update_fn(spec, status, namespace, logger, **kwargs):
-    # Update the PVC size
-    logger.info("ENTERING INTO EVC UPDATE")
-    glogger.debug("ALSO INTO the LOG FILE: ENTERING INTO EVC UPDATE")
+    ''' Update the PVC size '''
 
     size = spec.get('size', None)
     if not size:
@@ -93,6 +93,7 @@ def update_fn(spec, status, namespace, logger, **kwargs):
     pvc_name = status['create_fn']['pvc-name']
     pvc_patch = {'spec': {'resources': {'requests': {'storage': size}}}}
 
+    kubernetes.config.load_kube_config(config_file="/root/.kube/config", context=context)
     api = kubernetes.client.CoreV1Api()
     obj = api.patch_namespaced_persistent_volume_claim(
         namespace=namespace,
@@ -116,3 +117,4 @@ def relabel(old, new, status, namespace, **kwargs):
         name=pvc_name,
         body=pvc_patch,
     )
+

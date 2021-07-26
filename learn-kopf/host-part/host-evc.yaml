@@ -1,0 +1,9 @@
+# An example for how to create an EVC that triggers a PVC creation
+apiVersion: zalando.org/v1
+kind: EphemeralVolumeClaim
+metadata:
+  name: my-claim
+spec:
+  storageClassName: csi-cephfs
+  size: 1G
+

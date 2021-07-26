@@ -1,0 +1,66 @@
+https://kopf.readthedocs.io/en/latest/
+
+
+At 10.5.224.10 vmd (IP=10.5.22.24):
+===================================
+At the K8S cluster:
+------------------
+## The following is the Operator's CRD so done once on operator deployment
+# kaf crd.yaml  ## the CRD that has to run at the K8S cluster
+
+docker run -itd --name mykopf  \
+ -v  /root/learn-kopf/kopf-example:/root/learn-kopf/kopf-example \
+ --entrypoint="" mykopf bash
+
+docker attach mykopf
+
+At the docker:
+-------------
+scp -r 10.5.224.24:/root/.kube /root/  ### should be replaced e.g. by -v
+
+cd /root/learn-kopf/kopf-example
+
+=== TESTING ==========================================
+When the operator is running one can check by running:
+# kubectl apply -f evc.yaml
+# kubectl edit evc my-claim
+  ... change to 2G
+
+
+=====================================================
+docker tag kopf_ex:latest gideonagmon/kopf_ex
+docker push gideonagmon/kopf_ex
+=====================================================
+docker pull gideonagmon/kopf_ex
+docker tag gideonagmon/kopf_ex bcmt-registry:5000/kopf_ex
+
+docker run -itd --name kopf_ex  \
+-v /root/.kube/config:/root/.kube/config:ro \
+-e ...
+kopf_ex
+
+## for debug
+docker run -itd --name kopf_ex  \
+--privileged \
+-v /root/.kube/config:/root/.kube/config:ro \
+-v /etc/kubernetes/ssl:/etc/kubernetes/ssl:ro \
+-v /var/log:/var/log \
+-e 'K8S_CONFIG_FILE=/root/.kube/config' \
+-e 'K8S_CONTEXT=kubectl-context' \
+-v  /root/learn-kopf/kopf-example:/root/learn-kopf/kopf-example \
+-v /root/src:/src \
+--entrypoint="" kopf_ex bash
+
+( docker run -itd --name kopf_ex --privileged -v /root/.kube/config:/root/.kube/config:ro -v /etc/kubernetes/ssl:/etc/kubernetes/ssl:ro -e 'K8S_CONFIG_FILE=/root/.kube/config' -e 'K8S_CONTEXT=kubectl-context' -v  /root/learn-kopf/kopf-example:/root/learn-kopf/kopf-example --entrypoint="" kopf_ex bash
+
+## And within the docker container run:
+cd /src
+kopf run handlers.py --verbose
+
+=====================================================
+Making order, I put in the docker folder whatever is needed for it, and created the "host-part" that includes the CRD
+that defines the "evc"", and an example for a user evc manifest.
+
+# docker build -t kopf_ex
+At the docker:
+# kopf run khandler.py --verbose
