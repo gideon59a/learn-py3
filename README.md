@@ -1,3 +1,8 @@
+old git access:
+git checkout -b "v0.2"
+git status
+git push -u origin v0.2
+
 Various topics:
 
 kopf:
