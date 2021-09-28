@@ -4,8 +4,19 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/learn-kopf/kopf-example" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/learn-kopf/docker" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask-templates-2" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask-templates-2/templates" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask-websocket/ws-server-ex1-worked-ok" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask-websocket/ws-server-ex1-worked-ok/templates" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask-session-1" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask-session-1/templates" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/flask_login_ex1" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.9" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="gameBoard" />
+    <orderEntry type="module" module-name="beginner-html-site-styled-gh-pages" />
+    <orderEntry type="module" module-name="connect-four" />
   </component>
 </module>
