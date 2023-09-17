@@ -1,7 +1,7 @@
 # Ref: https://www.askpython.com/python-modules/flask/flask-sessions
 # Note: The "session" is a dictionary that contains data that exists throughout the session. Any key can be stored, i.e.
 # not just "Username" that is shown below.
-# SID Note that sid here is a random name chosen, not related to socketio's request.sid !!!
+# my-sid: Note that my_sid here is a random name chosen, not related to socketio's request.sid !!!
 
 from flask import Flask, session, jsonify
 import random
@@ -12,45 +12,60 @@ app.secret_key = "xyz"
 @app.route('/old-setsession')
 def oldsetsession():
     session['Username'] = 'Admin'
+    session['Username'] = 'Admin'
+    msg = f"The session has been Set"
+    print(f'On /old-setsession return {msg}')
     return f"The session has been Set"  # The return data appears also in a web page
 
 @app.route('/setsession')
 def setsession():
     random.randint(1,1000)
     session['Username'] = 'Admin'
-    session['sid'] = random.randint(1,1000)
-    return f"The session has been Set with username and sid: {session['Username']} {session['sid']}"  # The return data appears also in a web page
+    session['my_sid'] = random.randint(1, 1000)
+    print(f' on /setsession return {session["Username"]} {session["my_sid"]}')
+    #print(f'local session id: {id(session)}')
+    return f"The session has been Set with username and my_sid: {session['Username']} {session['my_sid']}"  # The return data appears also in a web page
 
 
 @app.route('/getsession')
 def getsession():
     if 'Username' in session:
         username = session['Username']
-        #sid = session['sid'] if 'sid' in session.keys() else ""
-        if 'sid' in session.keys():
-            sid = session['sid']
+        #my_sid = session['my_sid'] if 'my_sid' in session.keys() else ""
+        if 'my_sid' in session.keys():
+            my_sid = session['my_sid']
         else:
-            sid = ""
-        return f"Welcome {username} having sid {sid}"
+            my_sid = ""
+        print(f'On /getsession return "Welcome {username} having my_sid {my_sid}')
+        #print(f'local session id: {id(session)}')
+        return f"Welcome {username} having my_sid {my_sid}"
     else:
+        print(f'On /getsession return Welcome Anonymous')
+        #print(f'local session id: {id(session)}')
         return "Welcome Anonymous"
 
 @app.route('/getsession-json')
 def getsession_json():
-    if 'Username' in session:
+    if 'Username' in session:  # The server has a specific session object per client session
         username = session['Username']
-        if 'sid' in session.keys():
-            sid = session['sid']
+        if 'my_sid' in session.keys():
+            my_sid = session['my_sid']
         else:
-            sid = ""
-        return jsonify({"Welcome": username, "sid": sid})
+            my_sid = ""
+        msg = {"Welcome": username, "my_sid": my_sid}
+        print(f'on /getsession-json print {msg}')
+        #print(f'local session id: {id(session)}')
+        print(f'on /getsession-json print session dict: {session.__dict__}')
+        return jsonify(msg)
     else:
-        return jsonify({"Welcome": "Anonymous", "sid": ""})
+        print(f'on /getsession-json print {"Welcome": Anonymous, "my_sid": my_sid}')
+        return jsonify({"Welcome": "Anonymous", "my_sid": ""})
 
 
 @app.route('/popsession')
 def popsession():
     session.pop('Username', None)
+    print(f'on /popsession return "Session Deleted"')
     return "Session Deleted"
 
 
