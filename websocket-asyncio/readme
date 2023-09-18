@@ -1,0 +1,12 @@
+Purpose: Show how asyncio aiohttp can support multiple concurrent request (although a single process is yet used)
+The code is based on chatGPT.
+
+How to:
+# python server.py
+
+and concurrently in each of two other windows:
+# python client.py
+
+The server gets both requests. But, as each task takes 10sec cpu and a single process handles them all,
+the aggregate time is 40sec although each client needs just 20sec processing!
+See the websocket-uvicorn for how to run in parallel.

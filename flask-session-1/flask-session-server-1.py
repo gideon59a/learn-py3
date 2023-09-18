@@ -1,12 +1,13 @@
 # ref: https://www.geeksforgeeks.org/how-to-use-flask-session-in-python-flask/?ref=rp
 
 from flask import Flask, render_template, redirect, request, session
-# The Session instance is not used for direct access, you should always use flask.session
+# The Session instance is not used for direct access, for which you should always use flask.session
 from flask_session import Session
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_TYPE"] = "filesystem"  # One can use other db type, like sqlalchemy, redis, etc. With this the
+                                            # server creatres a sub-folder and puts the sessions there.
 Session(app)
 
 

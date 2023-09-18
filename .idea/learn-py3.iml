@@ -12,6 +12,8 @@
       <sourceFolder url="file://$MODULE_DIR$/flask-session-1" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/flask-session-1/templates" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/flask_login_ex1" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/k8s_client" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/k8s_client/k8s_client_utils" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
