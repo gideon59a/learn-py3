@@ -1,20 +1,40 @@
-# Todo:
-# 1. The ws token should arrive somehow from the server. On the other hand the token should not be changed once the server is temporarily disconnected.
-# 2. On server disconnection timeout, the program is not closed.
-
-
 import asyncio
 import aiohttp
 from aiohttp import BasicAuth, client_exceptions
 import threading
 import traceback
+import logging
 
+from client_ops import ClientOps
 
 SERVER_BASE_URL = f'http://localhost:8000'
-
-my_token = '12345'
+my_token = 'abcd12345'
 RETRY_INTERVAL = 2
 RETRY_NUMBER = 10
+
+LOG_FILE_FORMAT = '%(asctime)s MY_PREFIX [%(module)-15.15s] [%(levelname)-6.6s]  %(message)s'
+LOG_CONSOLE_FORMAT = '%(module)s - %(message)s'
+
+logging.basicConfig(filename='client.log', level=logging.INFO, format=LOG_FILE_FORMAT)
+
+logging.debug('Debug message sent from the main file')
+logging.info('Debug message sent from the main file')
+logging.info('So should this')
+logging.warning('And this, too')
+
+#logger = logging.getLogger(__name__)
+#logger.info("LOGGER - Send using logger before start")
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(logging.Formatter(LOG_CONSOLE_FORMAT))
+
+logger = logging.getLogger(__name__)
+
+
+
+
 
 global_ws_connection = None
 
@@ -80,7 +100,7 @@ class WebSocketClient:
     def __init__(self):
         self.ws = None
 
-    async def websocket_listener(self, ws_token, event, http_client):
+    async def websocket_listener(self, ws_token, event, http_client, client_ops):
         """
         :param ws_token: The token that identifies the specific client
         :param event: Set the event to notify that the message has been processed (triggering waiting for a new user input)
@@ -101,7 +121,8 @@ class WebSocketClient:
                             msg = await ws.receive()
                             if msg.type == aiohttp.WSMsgType.TEXT:
                                 print(f"Received WebSocket message: {msg.data}")
-                                print(f"Processing server ws message........................")
+                                result = client_ops.process_server_message(msg.data)
+                                print(f"The result status of the ws operation: {result['status']}")
                                 print("... Setting the event to continue receiving user inputs")
                                 event.set()  # Notify that the message is processed
                             elif msg.type in (aiohttp.WSMsgType.CLOSE, aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
@@ -112,8 +133,11 @@ class WebSocketClient:
                 traceback.print_exc()
                 retries -= 1
                 print(f"Failed to connect to server for websocket. Retrying in {RETRY_INTERVAL} seconds..., "
-                      f"retry {retries}/{RETRY_NUMBER}")
+                      f"retries left: {retries}/{RETRY_NUMBER}")
                 await asyncio.sleep(RETRY_INTERVAL)
+        print("Exit either due to no http_client running or due to ws disconnect with no retries left")
+        http_client.stop()
+        raise GracefulExit("********* Got exit request via user input!")
 
     def close_websocket(self):
         if self.ws:
@@ -121,7 +145,7 @@ class WebSocketClient:
             asyncio.create_task(self.ws.close())
 
 
-async def user_input_handler(queue, event, http_client):
+async def user_input_handler(queue, event, http_client, client_ops):
     while http_client.is_running():
         print("Waiting for a message from the websocket before continuing")
         print("ASYNC WAITING for the event to be set (before getting a new input)")
@@ -133,33 +157,16 @@ async def user_input_handler(queue, event, http_client):
         print("AFTER queue.get")
 
         print("Process user input")
-        if cmd.strip() == "exit":
+        op_result = await client_ops.process_user_input(cmd)
+        print(f"User processing result is: {op_result}")
+
+        if op_result["action"] == "to_exit":
             http_client.stop()
             raise GracefulExit("********* Got exit request via user input!")
-            ###break
-        elif cmd.strip():
-            data = {
-                "key": "cmd",
-                "value": cmd
-            }
-            print("ASYNC WAITING for http")
-
-            to_clear_event = True if 'l' in cmd else False
-            if 'p' in cmd:
-                endpoint = '/my_endpoint4'
-                await http_client.post(f'{endpoint}?ws_token={my_token}', json_data=data)
-            elif 'g' in cmd:
-                endpoint = '/my_endpoint3'
-                await http_client.get(f'{endpoint}?ws_token={my_token}')
-            else:
-                pass
-            print("AFTER HTTP")
-            if to_clear_event:
-                print("Clearing the event as we're waiting for a new WebSocket message before getting the next input "
-                      "from the user")
-                event.clear()
-        else:
-            print("Unknown command, re-enter command")
+        elif op_result["action"] == "to_clear_event":
+            print("Clearing the event as we're waiting for a new WebSocket message before getting the next input "
+                  "from the user")
+            event.clear()
 
 
 def input_thread(queue, loop, http_client):
@@ -176,11 +183,6 @@ async def basic_http_check(client):
     response_get = await client.get("/is_alive_auth", username='my_username', password="my_password")
     print(f"GET response: {response_get}")
 
-async def get_ws_token(http_client):
-    response_get = await http_client.get("/get_token")
-    print(f"Got token: {response_get}")
-    return response_get["ws_token"]
-
 
 async def main(http_client):
     """The purpose is to support two async processes simultaneously:
@@ -188,8 +190,8 @@ async def main(http_client):
           2. Get messages from the server via the ws connection. """
 
     #http_client = Client(SERVER_BASE_URL)
-    #my_token = await get_ws_token(http_client)
-    #print(f"My ws token is: {my_token}")
+    client_ops = ClientOps(my_token, http_client)
+
     # Initiates
     input_queue = asyncio.Queue()  # For user keyboard inputs
 
@@ -206,8 +208,8 @@ async def main(http_client):
     websocket_client = WebSocketClient()
 
     try:
-        task1 = asyncio.create_task(websocket_client.websocket_listener(my_token, event, http_client))
-        task2 = asyncio.create_task(user_input_handler(input_queue, event, http_client))
+        task1 = asyncio.create_task(websocket_client.websocket_listener(my_token, event, http_client, client_ops))
+        task2 = asyncio.create_task(user_input_handler(input_queue, event, http_client, client_ops))
         await asyncio.gather(task1, task2)
     except (KeyboardInterrupt, GracefulExit) as e:
         print(f"Exception, close program due to:  {e}")

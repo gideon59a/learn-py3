@@ -21,13 +21,13 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
 logger = logging.getLogger(__name__)
+logger.addHandler(fh)
 # add ch to logger
 logger.addHandler(ch)
+logger.info("++++ loger starts ++++")
 
 if __name__ == '__main__':
 
-    # The following has no effect, probably because the above basic config while
-    # there is no additional getLogger etc.
     logging.basicConfig(filename='internal.log', level=logging.DEBUG)
 
     logging.info('Sent using logging from the calling main')
