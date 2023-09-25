@@ -36,6 +36,11 @@ def endpoint3_wrong(background_tasks: BackgroundTasks):
     background_tasks.add_task(do_my_stuff)
     return {"message": "my_endpoint3 is In progress"}, 202
 
+
+# When the client accesses /my_endpoint3, which presents long action, the server have to return 202 and continue with
+# will proccessing the user request. The background_tasks below opens a thread (not a new process) where the
+# do_my_stuff will run, getting also the ws_token so the server can send some result to the client.
+# The below is not so good example because get is used rather than post.
 @app.get("/my_endpoint3")
 def endpoint3(ws_token: str, background_tasks: BackgroundTasks):
     background_tasks.add_task(do_my_stuff, ws_token)
@@ -48,6 +53,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()  # keep the connection open
+            print(f"ws data received by server: {data}")
     except:
         connected_clients.remove(websocket)
 
