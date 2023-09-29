@@ -5,9 +5,11 @@ import threading
 import traceback
 import logging
 
+
 from client_ops import ClientOps
 
 SERVER_BASE_URL = f'http://localhost:8000'
+
 my_token = 'abcd12345'
 RETRY_INTERVAL = 2
 RETRY_NUMBER = 10
@@ -31,9 +33,6 @@ ch.setLevel(logging.DEBUG)
 ch.setFormatter(logging.Formatter(LOG_CONSOLE_FORMAT))
 
 logger = logging.getLogger(__name__)
-
-
-
 
 
 global_ws_connection = None
