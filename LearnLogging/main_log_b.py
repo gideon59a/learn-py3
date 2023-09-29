@@ -21,8 +21,10 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
 logger = logging.getLogger(__name__)
+logger.addHandler(fh)
 # add ch to logger
 logger.addHandler(ch)
+logger.info("++++ loger starts ++++")
 
 if __name__ == '__main__':
 

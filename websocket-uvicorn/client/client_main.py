@@ -3,6 +3,8 @@ import aiohttp
 from aiohttp import BasicAuth, client_exceptions
 import threading
 import traceback
+import logging
+
 
 from client_ops import ClientOps
 
@@ -11,6 +13,27 @@ SERVER_BASE_URL = f'http://localhost:8000'
 my_token = 'abcd12345'
 RETRY_INTERVAL = 2
 RETRY_NUMBER = 10
+
+LOG_FILE_FORMAT = '%(asctime)s MY_PREFIX [%(module)-15.15s] [%(levelname)-6.6s]  %(message)s'
+LOG_CONSOLE_FORMAT = '%(module)s - %(message)s'
+
+logging.basicConfig(filename='client.log', level=logging.INFO, format=LOG_FILE_FORMAT)
+
+logging.debug('Debug message sent from the main file')
+logging.info('Debug message sent from the main file')
+logging.info('So should this')
+logging.warning('And this, too')
+
+#logger = logging.getLogger(__name__)
+#logger.info("LOGGER - Send using logger before start")
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(logging.Formatter(LOG_CONSOLE_FORMAT))
+
+logger = logging.getLogger(__name__)
+
 
 global_ws_connection = None
 
