@@ -49,7 +49,6 @@ class ServerOps:
 
     async def play(self, ws_token, data=None):
         self.logger.info(f"ZZZZZZZZZZ for ws_token: {ws_token}")
-        return
         if ws_token not in self.players:
             self.players.append(ws_token)
             if len(self.players) == 2:
